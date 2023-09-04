@@ -10,6 +10,8 @@ import styles from "./Form.module.css";
 import ButtonBack from "./ButtonBack";
 import Message from "./Message";
 import Spinner from "./Spinner.jsx";
+import { useCities } from "../contexts/CitiesContext";
+import { useNavigate } from "react-router-dom";
 
 export const convertToEmoji = (countryCode) => {
   const codePoints = countryCode
@@ -20,6 +22,8 @@ export const convertToEmoji = (countryCode) => {
 };
 
 const Form = () => {
+  const { createCity, isLoading } = useCities();
+  const navigate = useNavigate();
   const [isLoadingGeocoding, setIsLoadingGeocoding] = useState(false);
   const [lat, lng] = useUrlPosition();
   const [cityName, setCityName] = useState("");
@@ -55,21 +59,24 @@ const Form = () => {
     fetchCityData();
   }, [lat, lng]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if(!cityName || !date || !notes) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!cityName || !date || !notes) return;
 
-    const newCity = {
-      cityName,
-      date,
-      notes,
-      position: {
-        lat,
-        lng,
-      },
-    }
-    console.log(newCity);
+  const newCity = {
+    cityName,
+    date,
+    notes,
+    country,
+    position: {
+      lat,
+      lng,
+    },
   };
+
+  await createCity(newCity);
+  navigate('/app/cities')
+};
 
   if (isLoadingGeocoding) return <Spinner />;
 
@@ -78,7 +85,7 @@ const Form = () => {
   if (geocodingError) return <Message message={geocodingError} />;
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={`${styles.form} ${isLoading ? styles.loading : ""}`} onSubmit={handleSubmit}>
       <div className={styles.row}>
         <label htmlFor="cityName">City name</label>
         <input
