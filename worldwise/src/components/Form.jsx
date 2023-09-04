@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useUrlPosition } from "../hooks/useUrlPosition";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import Button from "./Button";
 import styles from "./Form.module.css";
@@ -55,8 +57,19 @@ const Form = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if(!cityName || !date || !notes) return;
 
-  }
+    const newCity = {
+      cityName,
+      date,
+      notes,
+      position: {
+        lat,
+        lng,
+      },
+    }
+    console.log(newCity);
+  };
 
   if (isLoadingGeocoding) return <Spinner />;
 
@@ -78,10 +91,10 @@ const Form = () => {
 
       <div className={styles.row}>
         <label htmlFor="date">When did you go to {cityName}?</label>
-        <input
-          id="date"
-          onChange={(e) => setDate(e.target.value)}
-          value={date}
+        <ReactDatePicker
+          onChange={(date) => setDate(date)}
+          selected={date}
+          dateFormat={"dd/MM/yyyy"}
         />
       </div>
 
