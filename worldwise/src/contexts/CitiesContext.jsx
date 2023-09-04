@@ -1,47 +1,106 @@
 /* eslint-disable react/prop-types */
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 const CitiesContext = createContext();
 
 const BASE_URL = "http://localhost:8000";
 
+import { useReducer } from "react";
+
+const initialState = {
+  cities: [],
+  isLoading: false,
+  currentCity: {},
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "FETCH_CITIES_START":
+      return { ...state, isLoading: true };
+    case "FETCH_CITIES_SUCCESS":
+      return {
+        ...state,
+        cities: action.payload,
+        isLoading: false,
+      };
+    case "FETCH_CITIES_ERROR":
+      alert("There was an error fetching cities");
+      return { ...state, isLoading: false };
+    case "GET_CITY_START":
+      return { ...state, isLoading: true };
+    case "GET_CITY_SUCCESS":
+      return {
+        ...state,
+        currentCity: action.payload,
+        isLoading: false,
+      };
+    case "GET_CITY_ERROR":
+      alert("There was an error loading cities");
+      return { ...state, isLoading: false };
+    case "CREATE_CITY_START":
+      return { ...state, isLoading: true };
+    case "CREATE_CITY_SUCCESS":
+      return {
+        ...state,
+        cities: [...state.cities, action.payload],
+        isLoading: false,
+      };
+    case "CREATE_CITY_ERROR":
+      alert("There was an error creating city");
+      return { ...state, isLoading: false };
+    case "DELETE_CITY_START":
+      return {
+        ...state,
+        isLoading: true,
+      };
+    case "DELETE_CITY_SUCCESS":
+      return {
+        ...state,
+        cities: state.cities.filter((city) => city.id !== action.payload),
+        isLoading: false,
+      };
+    case "DELETE_CITY_ERROR":
+      alert("There was an error deleting city");
+      return {
+        ...state,
+        isLoading: false,
+      };
+    default:
+      return state;
+  }
+};
+
 const CitiesProvider = ({ children }) => {
-  const [cities, setCities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentCity, setCurrentCity] = useState({});
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        setIsLoading(true);
+        dispatch({ type: "FETCH_CITIES_START" });
         const res = await fetch(`${BASE_URL}/cities`);
         const data = await res.json();
-        setCities(data);
+        dispatch({ type: "FETCH_CITIES_SUCCESS", payload: data });
       } catch (error) {
-        alert("There was an error");
-      } finally {
-        setIsLoading(false);
+        dispatch({ type: "FETCH_CITIES_ERROR" });
       }
     };
-
-    fetchCities();
+    fetchCities()
   }, []);
 
   const getCity = async (id) => {
     try {
-      setIsLoading(true);
+      dispatch({ type: "GET_CITY_START" });
       const res = await fetch(`${BASE_URL}/cities/${id}`);
       const data = await res.json();
-      setCurrentCity(data);
+      dispatch({ type: "GET_CITY_SUCCESS", payload: data });
     } catch (error) {
-      alert("There was an error");
-    } finally {
-      setIsLoading(false);
+      dispatch({ type: "GET_CITY_ERROR" });
     }
   };
+
   const createCity = async (newCity) => {
     try {
-      setIsLoading(true);
+      dispatch({ type: "CREATE_CITY_START" });
       const res = await fetch(`${BASE_URL}/cities/`, {
         method: "POST",
         body: JSON.stringify(newCity),
@@ -50,33 +109,30 @@ const CitiesProvider = ({ children }) => {
         },
       });
       const data = await res.json();
-      setCities((cities) => [...cities, data]);
+      dispatch({ type: "CREATE_CITY_SUCCESS", payload: data });
     } catch (error) {
-      alert("There was an error creating city");
-    } finally {
-      setIsLoading(false);
+      dispatch({ type: "CREATE_CITY_ERROR" });
     }
   };
+
   const deleteCity = async (id) => {
     try {
-      setIsLoading(true);
+      dispatch({ type: "DELETE_CITY_START" });
       await fetch(`${BASE_URL}/cities/${id}`, {
         method: "DELETE",
       });
-
-      setCities((cities) => cities.filter((city) => city.id !== id));
+      dispatch({ type: "DELETE_CITY_SUCCESS", payload: id });
     } catch (error) {
-      alert("There was an error deleting city");
-    } finally {
-      setIsLoading(false);
+      dispatch({ type: "DELETE_CITY_ERROR" });
     }
   };
+
   return (
     <CitiesContext.Provider
       value={{
-        cities,
-        isLoading,
-        currentCity,
+        cities: state.cities,
+        isLoading: state.isLoading,
+        currentCity: state.currentCity,
         getCity,
         createCity,
         deleteCity,
@@ -86,6 +142,7 @@ const CitiesProvider = ({ children }) => {
     </CitiesContext.Provider>
   );
 };
+
 const useCities = () => {
   const context = useContext(CitiesContext);
   if (context === undefined) {
