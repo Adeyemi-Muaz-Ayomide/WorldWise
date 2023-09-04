@@ -1,20 +1,31 @@
 /* eslint-disable react/prop-types */
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from "react-leaflet";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import styles from "./Map.module.css";
 import { useEffect, useState } from "react";
+import { useUrlPosition } from "../hooks/useUrlPosition";
 import { useCities } from "../contexts/CitiesContext";
 import { useGeolocation } from "../hooks/useGeolocation";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvent,
+} from "react-leaflet";
+import { useNavigate } from "react-router-dom";
+
+import styles from "./Map.module.css";
 import Button from "./Button";
 const Map = () => {
   const { cities } = useCities();
   const [mapPosition, setMapPosition] = useState([40, 0]);
-  const [searchParams ] = useSearchParams();
-  const {isLoading: isLoadingPosition, position: geolocationPosition, getPosition} = useGeolocation()
+  const {
+    isLoading: isLoadingPosition,
+    position: geolocationPosition,
+    getPosition,
+  } = useGeolocation();
 
   const navigate = useNavigate();
-  const mapLat = searchParams.get("lat");
-  const mapLng = searchParams.get("lng");
+  const [mapLat, mapLng] = useUrlPosition();
 
   useEffect(() => {
     if (mapLat && mapLng) {
@@ -29,9 +40,11 @@ const Map = () => {
   }, [geolocationPosition]);
   return (
     <div className={styles.mapContainer} onClick={() => navigate("form")}>
-      {!geolocationPosition && <Button type="button" onClick={getPosition}>
-        {isLoadingPosition ? "Loading..." : "use your Position"}
-      </Button>}
+      {!geolocationPosition && (
+        <Button type="position" onClick={getPosition}>
+          {isLoadingPosition ? "Loading..." : "use your Position"}
+        </Button>
+      )}
       <MapContainer
         center={mapPosition}
         // center={[mapLat, mapLng]}
@@ -72,7 +85,7 @@ const DetectClick = () => {
   useMapEvent("click", (e) => {
     console.log(e.latlng);
     navigate("form", { state: { lat: e.latlng.lat, lng: e.latlng.lng } });
-  })
-}
+  });
+};
 
 export default Map;
