@@ -59,9 +59,54 @@ const AuthProvider = ({ children }) => {
 const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within a AuthProvider");
+    throw new Error("AuthContext was used outside AuthProvider");
   }
   return context;
 };
 
 export { AuthProvider, useAuth };
+
+
+// Import the AuthProvider and useAuth hook where needed.
+// import React from 'react';
+// import { AuthProvider, useAuth } from './AuthContext'; // Update the path as per your project structure
+
+// function App() {
+//   return (
+//     <AuthProvider>
+//       <AppContent />
+//     </AuthProvider>
+//   );
+// }
+
+// function AppContent() {
+//   const { user, isAuthenticated, login, logout } = useAuth();
+
+//   const handleLogin = () => {
+//     // Call the login function with user input
+//     login("jack@example.com", "qwerty");
+//   };
+
+//   const handleLogout = () => {
+//     // Call the logout function
+//     logout();
+//   };
+
+//   return (
+//     <div>
+//       {isAuthenticated ? (
+//         <div>
+//           <p>Welcome, {user.name}!</p>
+//           <button onClick={handleLogout}>Logout</button>
+//         </div>
+//       ) : (
+//         <div>
+//           <p>Please login:</p>
+//           <button onClick={handleLogin}>Login</button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// export default App;
