@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
+import { useCities } from "../contexts/CitiesContext";
+
 import styles from "./CountryList.module.css";
 import Spinner from "./Spinner";
 import CountryItem from "./CountryItem";
 import Message from "./Message";
-import { useCities } from "../contexts/CitiesContext";
 
 const CountryList = () => {
   const { cities, isLoading } = useCities();

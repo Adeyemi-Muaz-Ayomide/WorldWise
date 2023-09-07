@@ -1,15 +1,14 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import styles from "./Message.module.css";
-import PropTypes from "prop-types";
 
-function Message({ message }) {
+const Message = ({ message }) => {
   return (
     <p className={styles.message}>
       <span role="img">👋</span> {message}
     </p>
   );
 }
-Message.propTypes = {
-  message: PropTypes.string.isRequired,
-};
+
 
 export default Message;

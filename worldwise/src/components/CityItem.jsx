@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useCities } from "../contexts/CitiesContext";
-import styles from "./CityItem.module.css";
 import { Link } from "react-router-dom";
+import { useCities } from "../contexts/CitiesContext";
+
+import styles from "./CityItem.module.css";
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -17,8 +18,7 @@ const CityItem = ({ city }) => {
   const handleClick = (e) => {
     e.preventDefault();
     deleteCity(id);
-    
-  }
+  };
   return (
     <li>
       <Link
@@ -30,8 +30,9 @@ const CityItem = ({ city }) => {
         <span className={styles.emoji}>{emoji}</span>
         <h3 className={styles.name}>{cityName}</h3>
         <time className={styles.date}>{formatDate(date)}</time>
-        <button className={styles.deleteBtn} onClick={handleClick}>&times;</button>
-
+        <button className={styles.deleteBtn} onClick={handleClick}>
+          &times;
+        </button>
       </Link>
     </li>
   );

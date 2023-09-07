@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import { useUrlPosition } from "../hooks/useUrlPosition";
 import { useCities } from "../contexts/CitiesContext";
 import { useGeolocation } from "../hooks/useGeolocation";
+import { useNavigate } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMap,
-  useMapEvent,
+  useMapEvents,
 } from "react-leaflet";
-import { useNavigate } from "react-router-dom";
 
 import styles from "./Map.module.css";
 import Button from "./Button";
+
 const Map = () => {
   const { cities } = useCities();
   const [mapPosition, setMapPosition] = useState([40, 0]);
@@ -24,7 +25,6 @@ const Map = () => {
     getPosition,
   } = useGeolocation();
 
-  const navigate = useNavigate();
   const [mapLat, mapLng] = useUrlPosition();
 
   useEffect(() => {
@@ -38,16 +38,16 @@ const Map = () => {
       setMapPosition([geolocationPosition.lat, geolocationPosition.lng]);
     }
   }, [geolocationPosition]);
+
   return (
-    <div className={styles.mapContainer} onClick={() => navigate("form")}>
+    <div className={styles.mapContainer}>
       {!geolocationPosition && (
         <Button type="position" onClick={getPosition}>
-          {isLoadingPosition ? "Loading..." : "use your Position"}
+          {isLoadingPosition ? "Loading..." : "Use your Position"}
         </Button>
       )}
       <MapContainer
         center={mapPosition}
-        // center={[mapLat, mapLng]}
         zoom={6}
         scrollWheelZoom={true}
         className={styles.map}
@@ -75,16 +75,15 @@ const Map = () => {
 };
 const ChangeCenter = ({ position }) => {
   const map = useMap();
-  map.setView(position, 6);
+  map.setView(position);
   return null;
 };
 
 const DetectClick = () => {
   const navigate = useNavigate();
 
-  useMapEvent("click", (e) => {
-    console.log(e.latlng);
-    navigate("form", { state: { lat: e.latlng.lat, lng: e.latlng.lng } });
+  useMapEvents({
+    click: (e) => navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`),
   });
 };
 
